@@ -20,6 +20,9 @@ data %>%
       pff_DISTANCE < 3 ~ "Shortest"
     ),
     # Create field position bins
+    # Before crossing midfield, teams are focused on getting first downs, rather than scoring touchdowns or field goals.
+    # Once teams pass the 50 yard line, they become more focused on scoring points, so game strategy may change. We split up the Redzone, 
+    # because once teams are within 10 yards of a touchdown, game strategies may change in order to score a touchdown rather than a field goal. 
     FIELDPOSITION_BIN = case_when(
       between(FIELDPOSITION, 0, 20) ~ "Own Side - Far",
       between(FIELDPOSITION, 21, 50) ~ "Own Side",
