@@ -32,8 +32,6 @@ data %>%
     ),
     # Calculate change in score
     POINTS_SCORED = case_when(
-      # pff_DRIVEPLAY == pff_DRIVEENDPLAYNUMBER ~ lead(pff_DEFSCORE) - pff_OFFSCORE,
-      # TRUE ~ lead(pff_OFFSCORE) - pff_OFFSCORE
       (pff_DRIVEPLAY == pff_DRIVEENDPLAYNUMBER) & (pff_DRIVEENDEVENT == "FIELD GOAL") ~ 3,
       (pff_DRIVEPLAY == pff_DRIVEENDPLAYNUMBER) & (pff_DRIVEENDEVENT == "FUMBLE-TD") ~ -6,
       (pff_DRIVEPLAY == pff_DRIVEENDPLAYNUMBER) & (pff_DRIVEENDEVENT == "INTERCEPTION-TD") ~ -6,
@@ -42,7 +40,7 @@ data %>%
       TRUE ~ 0
   )) %>% 
   filter(
-    # Remove garbage time, lingering drives, and 2/4 quarters
+    # Remove garbage time and 2/4 quarters
     pff_GARBAGETIME == 0,
     pff_QUARTER %in% c(1,3),
     # Remove no-score scenarios
@@ -58,10 +56,10 @@ data %>%
 ### Write function to return expected points for given situation
 expected_points <- function(down, fp, ytg, pos) {
     
+    # Convert field position depending on if pos = "own" or "opp"
     fp_converted <- ifelse(
       tolower(pos) == "own", fp, 100 - fp
     )
-    # print(fp_converted)
   
     fp_bin <- case_when(
       between(fp_converted, 0, 20) ~ "Own Side - Far",
@@ -70,7 +68,6 @@ expected_points <- function(down, fp, ytg, pos) {
       between(fp_converted, 80, 89) ~ "Redzone - Far",
       fp_converted >= 90 ~ "Redzone - Close"
     )
-    # print(fp_bin)
     
     ytg_bin = case_when(
       ytg >= 8 ~ "Long",
@@ -78,7 +75,6 @@ expected_points <- function(down, fp, ytg, pos) {
       between(ytg, 3, 4) ~ "Short",
       ytg < 3 ~ "Shortest"
     )
-    # print(ytg_bin)
     
     empirical_model %>%
       filter(
@@ -86,10 +82,8 @@ expected_points <- function(down, fp, ytg, pos) {
         FIELDPOSITION_BIN == fp_bin,
         DISTANCE_BIN == ytg_bin
       ) %>%
-      
-      pull(expected_points) %>%
-      if (expected_points[lengths(expected_points)==0]) {
-        expected_points[lengths(expected_points)==0]<-NA
-      }
+      pull(expected_points) -> ep
+    
+    ifelse(length(ep) == 0, NA, ep)
   }
   
