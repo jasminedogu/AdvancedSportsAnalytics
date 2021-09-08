@@ -1,6 +1,6 @@
 library(tidyverse)
 
-setwd("~/Fall 2021 Courses/STAT 4800")
+#setwd("~/Fall 2021 Courses/STAT 4800")
 
 data <- read.csv("2019 PFF All Plays.csv")
 
@@ -86,6 +86,10 @@ expected_points <- function(down, fp, ytg, pos) {
         FIELDPOSITION_BIN == fp_bin,
         DISTANCE_BIN == ytg_bin
       ) %>%
-      pull(expected_points)
+      
+      pull(expected_points) %>%
+      if (expected_points[lengths(expected_points)==0]) {
+        expected_points[lengths(expected_points)==0]<-NA
+      }
   }
   
