@@ -43,4 +43,9 @@ team_matrix[upper.tri(team_matrix) | lower.tri(team_matrix)] <- team_matrix[uppe
 
 markov_chain <- new("markovchain", states = teams_list, transitionMatrix = team_matrix)
 
-steadyStates(markov_chain) %>% as.data.frame() %>% t() -> rankings
+steadyStates(markov_chain) %>%
+  t() %>%
+  as.data.frame() %>%
+  rename(steadyStateProb=V1) %>%
+  arrange(desc(steadyStateProb)) %>%
+  mutate(ranking = row_number()) -> rankings
