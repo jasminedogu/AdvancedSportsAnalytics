@@ -786,6 +786,225 @@ third_down %>%
   ) %>%
   summarize(mean(pff_RUNPASS == "P")) # 74.7% pass, 25.3% run
 
+# Pass
+plotdist((third_down %>%
+            filter(FIELDPOSITION <= 20,
+                   pff_RUNPASS %in% c("P")
+            ))$pff_GAINLOSS,
+         histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P")
+  ) %>%
+  summarize(
+    pos = mean(pff_GAINLOSS > 0 & !is.na(pff_GAINLOSS)), # 48.8%
+    inc = mean(pff_GAINLOSS == 0 | is.na(pff_GAINLOSS)), # 40.5%
+    neg = mean(pff_GAINLOSS < 0 & !is.na(pff_GAINLOSS))  # 10.6%
+  )
+
+# Positive Pass
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Gamma(shape = 1.676, rate = 0.1212)
+
+# Negative Pass
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# -Weibull(Shape = 1.644, Scale = 5.988)
+
+# Run
+plotdist((third_down %>%
+            filter(FIELDPOSITION <= 20,
+                   pff_RUNPASS %in% c("R")
+            ))$pff_GAINLOSS,
+         histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R")
+  ) %>%
+  summarize(
+    pos = mean(pff_GAINLOSS > 0 & !is.na(pff_GAINLOSS)), # 81.4%
+    neg = mean(pff_GAINLOSS <= 0 & !is.na(pff_GAINLOSS))  # 18.6%
+  )
+
+# Positive Run
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Gamma(shape = 1.2056, rate = 0.1612)
+
+# Negative Run
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS < 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("lnorm") -> fln
+
+third_down %>%
+  filter(FIELDPOSITION <= 20,
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("exp") -> fexp
+
+plot.legend <- c("Weibull", "lognormal", "gamma", "exp")
+denscomp(list(fw, fln, fg, fexp), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# -Lnorm(meanlog = .7313, sdlog = .6045)
+
 
 # Open Field ----
 third_down %>%
@@ -793,6 +1012,225 @@ third_down %>%
          pff_RUNPASS %in% c("R", "P")
   ) %>%
   summarize(mean(pff_RUNPASS == "P")) # 70.8% pass, 29.2% run
+
+# Pass
+plotdist((third_down %>%
+            filter(between(FIELDPOSITION, 20, 80),
+                   pff_RUNPASS %in% c("P")
+            ))$pff_GAINLOSS,
+         histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P")
+  ) %>%
+  summarize(
+    pos = mean(pff_GAINLOSS > 0 & !is.na(pff_GAINLOSS)), # 51.1%
+    inc = mean(pff_GAINLOSS == 0 | is.na(pff_GAINLOSS)), # 39.0%
+    neg = mean(pff_GAINLOSS < 0 & !is.na(pff_GAINLOSS))  # 9.9%
+  )
+
+# Positive Pass
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Gamma(shape = 1.7538, rate = .1367)
+
+# Negative Pass
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# -Weibull(Shape = 1.7498, Scale = 6.6857)
+
+# Run
+plotdist((third_down %>%
+            filter(between(FIELDPOSITION, 20, 80),
+                   pff_RUNPASS %in% c("R")
+            ))$pff_GAINLOSS,
+         histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R")
+  ) %>%
+  summarize(
+    pos = mean(pff_GAINLOSS > 0 & !is.na(pff_GAINLOSS)), # 79.3%
+    neg = mean(pff_GAINLOSS <= 0 & !is.na(pff_GAINLOSS))  # 20.7%
+  )
+
+# Positive Run
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Weibull(shape = 1.014, scale = 6.905)
+
+# Negative Run
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS < 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("lnorm") -> fln
+
+third_down %>%
+  filter(between(FIELDPOSITION, 20, 80),
+         pff_RUNPASS %in% c("R"),
+         pff_GAINLOSS< 0,
+         !is.na(pff_GAINLOSS)
+  ) %>% 
+  mutate(loss = -1*pff_GAINLOSS) %>%
+  pull(loss) %>%
+  fitdist("exp") -> fexp
+
+plot.legend <- c("Weibull", "lognormal", "gamma", "exp")
+denscomp(list(fw, fln, fg, fexp), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Exp(rate = .410)
 
 # Opponent Redzone ----
 third_down %>%
@@ -820,11 +1258,14 @@ third_down %>%
   )
 
 # Positive Pass
+
+# YTG > 3
 third_down %>%
   filter(FIELDPOSITION >= 80,
          pff_RUNPASS %in% c("P"),
          pff_GAINLOSS > 0,
-         !is.na(pff_GAINLOSS)
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE > 3
   ) %>% 
   pull(pff_GAINLOSS) %>%
   plotdist(histo = TRUE, demp = TRUE)
@@ -833,7 +1274,8 @@ third_down %>%
   filter(FIELDPOSITION >= 80,
          pff_RUNPASS %in% c("P"),
          pff_GAINLOSS > 0,
-         !is.na(pff_GAINLOSS)
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE > 3
   ) %>% 
   pull(pff_GAINLOSS) %>%
   fitdist("weibull") -> fw
@@ -842,7 +1284,8 @@ third_down %>%
   filter(FIELDPOSITION >= 80,
          pff_RUNPASS %in% c("P"),
          pff_GAINLOSS > 0,
-         !is.na(pff_GAINLOSS)
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE > 3
   ) %>% 
   pull(pff_GAINLOSS) %>%
   fitdist("gamma") -> fg
@@ -851,7 +1294,8 @@ third_down %>%
   filter(FIELDPOSITION >= 80,
          pff_RUNPASS %in% c("P"),
          pff_GAINLOSS > 0,
-         !is.na(pff_GAINLOSS)
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE > 3
   ) %>% 
   pull(pff_GAINLOSS) %>%
   fitdist("lnorm") -> fln
@@ -859,7 +1303,53 @@ third_down %>%
 plot.legend <- c("Weibull", "lognormal", "gamma")
 denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
 
-# Gamma(shape = 2.266, rate = 0.284)
+# Gamma(shape = 2.643, rate = 0.310)
+
+# YTG <= 3
+third_down %>%
+  filter(FIELDPOSITION >= 80,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE <= 3
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  plotdist(histo = TRUE, demp = TRUE)
+
+third_down %>%
+  filter(FIELDPOSITION >= 80,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE <= 3
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("weibull") -> fw
+
+third_down %>%
+  filter(FIELDPOSITION >= 80,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE <= 3
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("gamma") -> fg
+
+third_down %>%
+  filter(FIELDPOSITION >= 80,
+         pff_RUNPASS %in% c("P"),
+         pff_GAINLOSS > 0,
+         !is.na(pff_GAINLOSS),
+         pff_DISTANCE <= 3
+  ) %>% 
+  pull(pff_GAINLOSS) %>%
+  fitdist("lnorm") -> fln
+
+plot.legend <- c("Weibull", "lognormal", "gamma")
+denscomp(list(fw, fln, fg), legendtext = plot.legend, plotstyle = "ggplot", xlegend = "top")
+
+# Lnorm(meanlog = 1.3833, sdlog = 0.8102)
 
 # Negative Pass
 third_down %>%
