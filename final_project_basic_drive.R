@@ -4,9 +4,9 @@ play <- function() {
 
 ### posession function
 
-full_drive <- function(A, C, D){
+full_drive <- function(fp, ytg, down){
   
-  # A is starting field position of play (ranges from 0 to 100 (so your own 25 would be 25. 100 would be a touchdown))
+  # fp is starting field position of play (ranges from 0 to 100 (so your own 25 would be 25. 100 would be a touchdown))
   # C is yards to first down
   # D is down number
   
@@ -20,32 +20,32 @@ full_drive <- function(A, C, D){
     
     yards_gained <- play()
         
-        A = A + yards_gained
-        C = C - yards_gained
-        D = ifelse(C <= 0, 1, D + 1)
+        fp = fp + yards_gained
+        ytg = ytg - yards_gained
+        down = ifelse(ytg <= 0, 1, down + 1)
         
-        if (D == 1) { #if first down, reset YTG to 10
-          C = 10
+        if (down == 1) { #if first down, reset YTG to 10
+          ytg = 10
         }
         
         k <- k + 1
         
-      if (D == 4) {  
-        if (A >= 70) { #if within 30 yards of end zone, simulate field goal
-          prob <- field_goal_probability(A)
+      if (down == 4) {  
+        if (fp >= 70) { #if within 30 yards of end zone, simulate field goal
+          prob <- field_goal_probability(fp)
           field_goal <- sample.int(2, size = 1, prob = c(prob, 1 - prob))
           if (field_goal == 1) {
             drive_result$score <- 3
             drive_result$event <- "FG"
           } else {
-            drive_result$end_yard <- A
+            drive_result$end_yard <- fp
             drive_result$event <- "Missed FG"
           }
         } else { #or else simulate punt
           punt_yards <- rnorm(1, 40.5, 9.7)
-          drive_result$end_yard <- ifelse(A + punt_yards <= 0,
+          drive_result$end_yard <- ifelse(fp + punt_yards <= 0,
                                           25,
-                                          A + punt_yards)
+                                          fp + punt_yards)
           drive_result$event <- "Punt"
         }
           is_not_done <- FALSE
@@ -67,7 +67,7 @@ full_drive <- function(A, C, D){
         #   is_not_done <- FALSE
         # }
         
-     if (A >= 100) {
+     if (fp >= 100) {
         drive_result$score <- 7
         drive_result$event <- "Touchdown"
         print("Touchdown")
@@ -75,7 +75,7 @@ full_drive <- function(A, C, D){
       }
       
       if(k > 100){
-        drive_result$end_yard <- A
+        drive_result$end_yard <- fp
         is_not_done <- FALSE
       }
         
