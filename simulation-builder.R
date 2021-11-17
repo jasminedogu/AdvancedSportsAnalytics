@@ -1,7 +1,3 @@
-field_goal_probability <- function(x) {
-  exp(-5.832 + 0.0861*(x)) / (1 + exp(-5.832 + 0.0861*(x)))
-}
-
 ### 1st or 2nd down
 if (down %in% c(1,2)) {
   
@@ -195,26 +191,34 @@ if (down == 4) {
   # If in FG range, determine scenario
   if (fp < 65) {
     
-    # Add punt distributions
+    # Add punt distributions (this is a placeholder)
+    punt_yards <- rnorm(1, 40.5, 9.7)
+    drive_result$end_yard <- ifelse(fp - punt_yards <= 0,
+                                    25,
+                                    fp - punt_yards)
+    drive_result$event <- "Punt"
+    is_turnover <- TRUE
+    
   }
   if (fp >= 65) {
   # Always kick field goal
     if (fds == 0) {
-      prob <- field_goal_probability(A)
+      prob <- field_goal_probability(fp)
       field_goal <- sample.int(2, size = 1, prob = c(prob, 1 - prob))
       if (field_goal == 1) {
         drive_result$score <- 3
         drive_result$event <- "FG"
       } else {
         drive_result$score <- 0
-        drive_result$end_yard <- A
+        drive_result$end_yard <- fp
         drive_result$event <- "Missed FG"
       }
       is_not_done <- FALSE
     }
     else if (fds == 1) {
       
-      # Add run/pass distributions
+      # Add run/pass distributions (this is a placeholder)
+      yards_gained <- rnorm(1, 3.5, 1)
       
     }
   } 
@@ -231,6 +235,13 @@ if (fp >= 100) {
   is_not_done <- FALSE
 }
 
-if (D == 1) { #if first down, reset YTG to 10
-  C = 10
+if (down == 1) { #if first down, reset YTG to 10
+  ytg = 10
 }
+
+if (down == 5) { # turnover on downs
+    drive_result$end_yard <- A
+    drive_result$event <- "Turnover on Downs"
+    print("TOD")
+    is_turnover <- TRUE
+  }
