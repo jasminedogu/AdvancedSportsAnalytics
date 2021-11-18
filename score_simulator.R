@@ -1,46 +1,40 @@
+setwd("~/Fall 2021 Courses/STAT 4800/AdvancedSportsAnalytics")
+library(tidyverse)
+source('final_project_basic_drive.R')
+source('field_goal_probability.R')
+
 
 #This function loops and repeatedly calls the function full_drive until someone scores.
 #One of the main things this function does is keep track of which team has the ball.
-game_simulator <- function(fp, ytg, down, strat4th=NA) {
+game_simulator <- function(fp, ytg, down, strat4th=NA, pos) {
   team <- 0 #start with team 0
   scoreless <- TRUE
   
   while(scoreless){
     
-    result_drive <- full_drive(fp, ytg, down, strat4th)
+    drive_result <- full_drive(fp, ytg, down, strat4th, pos)
+    strat4th_initial <- strat4th
     
-    if(!is.na(result_drive$score)) {
+    if(!is.na(drive_result$score)) {
       scoreless <- FALSE
-      # break
+      break
+    }
+    
+    if(is.na(drive_result$score)) {
+      
+      # give the other team the ball where the previous team left off
+      pos <- (pos+1)%%2
+      down <- 100 - drive_result$end_yard
+      ytg <- 10
+      down <- 1
+      strat4th <- ifelse(pos == 1, NA, strat4th_initial)
     }
   }
+    score <- ifelse(
+      pos == 0,
+      drive_result$score,
+      -1*drive_result$score
+    )
     
-    if(!is.na(result_drive$score)) {
-      # print(paste0("team ", team, " scored!")) 
-      score[team+1] <- as.numeric(score[team+1]) + result_drive$score
-      
-      # other team gets the ball
-      team <- (team+1)%%2
-      
-      A <- 75 # assume every kickoff is a touchback
-      B <- result_drive$end_time - .2 # assume kickoff takes 12 seconds
-      C <- 10
-      D <- 1
-      F <- ifelse(team == 1, 0, F) # Team 1 is always non-aggressive
-      
-    } else {
-      # give the other team the ball where the previous team left off
-      team <- (team+1)%%2 
-      
-      A <- 100 - result_drive$end_yard
-      B <- result_drive$end_time
-      C <- 10
-      D <- 1
-      F <- ifelse(team == 1, 0, F_0)
-      
-  
-  print(paste0("The final score is: Team 0 - ", score[1], ", Team 1 - ",
-               score[2]))
-  
-  return(c("Team_0" = score[[1]], "Team_1" = score[[2]]))
+    return(score)
 }

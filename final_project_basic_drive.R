@@ -1,3 +1,4 @@
+# Test variables
 fp <- 25
 ytg <- 10
 down <- 1
@@ -9,6 +10,8 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
   # fp is starting field position of play (ranges from 0 to 100 (so your own 25 would be 25. 100 would be a touchdown))
   # ytg is yards to first down
   # down is down number
+  # strat4th is 4th down strategy
+  # pos is team that starts with possession ()
   
   is_not_done <- TRUE
   pos <- pos # start with "our team" on offense
@@ -237,7 +240,7 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
             drive_result$event <- "Missed FG"
           }
           is_not_done <- FALSE
-          break
+          # break
         }
         else if (strat4th == 1) {
           
@@ -245,14 +248,21 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
           yards_gained <- rnorm(1, 3.5, 1)
           
         }
+        
+        else if (is.na(strat4th)) {
+          
+          # Add distributions for opposing team(this is a placeholder)
+          yards_gained <- rnorm(1, 3.5, 1)
+          
+        }
       } 
     }
     
-    # fp = fp + yards_gained
+    fp = fp + yards_gained
     # print(paste("New fp is:", fp))
-    # ytg = ytg - yards_gained
+    ytg = ytg - yards_gained
     # print(paste("New ytg is:", ytg))
-    # down = ifelse(ytg <= 0, 1, down + 1)
+    down = ifelse(ytg <= 0, 1, down + 1)
     # print(paste("New down:", down))
     
     if (fp >= 100) {
@@ -265,17 +275,17 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
     
     if (down == 1) { #if first down, reset YTG to 10
       ytg = 10
-      print("First down")
+      # print("First down")
     }
     
     if (down == 5) { # turnover on downs
       drive_result$end_yard <- fp
       drive_result$event <- "Turnover on Downs"
-      print("TOD")
+      # print("TOD")
       is_not_done <- FALSE
     }
         
   }
   
-  print(drive_result)
+  return(drive_result)
 }
