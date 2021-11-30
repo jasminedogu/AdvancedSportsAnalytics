@@ -5,8 +5,7 @@ source('field_goal_probability.R')
 
 
 #This function loops and repeatedly calls the function full_drive until someone scores.
-#One of the main things this function does is keep track of which team has the ball.
-game_simulator <- function(fp, ytg, down, strat4th=NA, pos) {
+score_simulator <- function(fp, ytg, down, strat4th="NA", pos) {
   team <- 0 #start with team 0
   scoreless <- TRUE
   
@@ -27,7 +26,7 @@ game_simulator <- function(fp, ytg, down, strat4th=NA, pos) {
       down <- 100 - drive_result$end_yard
       ytg <- 10
       down <- 1
-      strat4th <- ifelse(pos == 1, NA, strat4th_initial)
+      strat4th <- ifelse(pos == 1, "NA", strat4th_initial)
     }
   }
     score <- ifelse(

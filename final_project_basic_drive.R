@@ -1,16 +1,16 @@
-# Test variables
-fp <- 25
-ytg <- 10
-down <- 1
-strat4th <- 0
-pos <- 0
+# # Test variables
+# fp <- 25
+# ytg <- 10
+# down <- 1
+# strat4th <- 0
+# pos <- 0
 
 full_drive <- function(fp, ytg, down, strat4th, pos){
   
   # fp is starting field position of play (ranges from 0 to 100 (so your own 25 would be 25. 100 would be a touchdown))
   # ytg is yards to first down
   # down is down number
-  # strat4th is 4th down strategy
+  # strat4th is 4th down strategy (0 if FG case, 1 going for it, NA other team has ball)
   # pos is team that starts with possession ()
   
   is_not_done <- TRUE
@@ -211,22 +211,26 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
     
     ### 4th down
     if (down == 4) {
-      if (fp < 65) {
-        print("Out of FG range")
+      if (fp < 60) {
+        # print("Out of FG range")
         # Add punt distributions (this is a placeholder)
-        punt_yards <- rnorm(1, 40.5, 9.7)
-        print(punt_yards)
+        punt_yards <- ifelse(
+          fp < 40,
+          rnorm(1, 40.5, 9.7),
+          rnorm(1, 28.5, 6.7)
+        )
+        # print(punt_yards)
         drive_result$end_yard <- ifelse(fp + punt_yards >= 100,
-                                        25,
+                                        75,
                                         fp + punt_yards)
         drive_result$event <- "Punt"
-        print(is_not_done)
+        # print(is_not_done)
         is_not_done <- FALSE
         break
-        print(paste("is_not_done is now", is_not_done))
+        # print(paste("is_not_done is now", is_not_done))
         
       }
-      else if (fp >= 65) {
+      else if (fp >= 60) {
         # Always kick field goal
         if (strat4th == 0) {
           prob <- field_goal_probability(fp)
@@ -235,28 +239,124 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
             drive_result$score <- 3
             drive_result$event <- "FG"
           } else {
-            drive_result$score <- 0
-            drive_result$end_yard <- fp
+            drive_result$score <- NA
+            drive_result$end_yard <- fp-7 # move back 7 yards
             drive_result$event <- "Missed FG"
           }
           is_not_done <- FALSE
-          # break
+          break
         }
+        # Go for it
         else if (strat4th == 1) {
-          
-          # Add run/pass distributions (this is a placeholder)
-          yards_gained <- rnorm(1, 3.5, 1)
-          
+          if (between(fp, 60, 80)) {
+          play_type_prob <- sample.int(2, size = 1, prob = c(.583, 1-.583))
+          play_type <- c("P", "R")[play_type_prob]
+            if (play_type == "P") {
+              int <- sample.int(3, size = 1, 
+                                prob = c(.489, .437, .073))
+              pos_neg <- c("POS", "0", "NEG")[int]
+              if (pos_neg == "POS") {
+                yards_gained = rgamma(1, shape = 1.784, rate = .1315)
+              } else if (pos_neg == "NEG") {
+                yards_gained = -rweibull(1, shape = 1.77, scale = 8.232)
+              } else {
+                yards_gained = 0 
+              }
+            } else if (play_type == "R") {
+              int <- sample.int(2, size = 1, 
+                                prob = c(.715, 1-.715))
+              pos_neg <- c("POS", "NEG")[int]
+              if (pos_neg == "POS") {
+                yards_gained = rweibull(1, shape = 0.941, scale = 5.973)
+              } else if (pos_neg == "NEG") {
+                yards_gained = -rlnorm(1, meanlog = 0.847, sdlog = 0.797)
+              }
+            }
+            
+          }
+            else {
+              play_type_prob <- sample.int(2, size = 1, prob = c(.465, 1-.465))
+              play_type <- c("P", "R")[play_type_prob]
+              if (play_type == "P") {
+                int <- sample.int(3, size = 1, 
+                                  prob = c(.45, .49, .06))
+                pos_neg <- c("POS", "0", "NEG")[int]
+                if (pos_neg == "POS") {
+                  yards_gained = ifelse(
+                    ytg <= 3,
+                    rlnorm(1, meanlog = 1.197, sdlog = 0.851),
+                    rgamma(1, shape = 3.026, rate = 0.332)
+                  ) 
+                } else if (pos_neg == "NEG") {
+                  yards_gained = -rgamma(1, shape = 2.471, rate = 0.374)
+                } else {
+                  yards_gained = 0 
+                }
+                
+              } else if (play_type == "R") {
+                int <- sample.int(2, size = 1, 
+                                  prob = c(697, 1-.697))
+                pos_neg <- c("POS", "NEG")[int]
+                if (pos_neg == "POS") {
+                  yards_gained = rlnorm(1, meanlog = 0.861, sdlog = .814) 
+                } else if (pos_neg == "NEG") {
+                  yards_gained = -rlnorm(1, meanlog = 0.625, sdlog = 0.572)
+                }
+              }
+            }
         }
-        
-        else if (is.na(strat4th)) {
+        # Other team
+        else if (strat4th == "NA") {
           
-          # Add distributions for opposing team(this is a placeholder)
-          yards_gained <- rnorm(1, 3.5, 1)
-          
+          # determine if opp. team will go for it if within YTG range  
+          go_for_it <- sample.int(2, size = 1, prob = c(.5, .5))
+             if (ytg >= 3 | go_for_it == 1) {
+               prob <- field_goal_probability(fp)
+               field_goal <- sample.int(2, size = 1, prob = c(prob, 1 - prob))
+               if (field_goal == 1) {
+                 drive_result$score <- 3
+                 drive_result$event <- "FG"
+               } else {
+                 drive_result$score <- NA
+                 drive_result$end_yard <- fp-7 # move back 7 yards
+                 drive_result$event <- "Missed FG"
+               }
+               is_not_done <- FALSE
+               break
+             } else if (ytg < 3 & go_for_it == 0) {
+               
+                 play_type_prob <- sample.int(2, size = 1, prob = c(.465, 1-.465))
+                 play_type <- c("P", "R")[play_type_prob]
+                 if (play_type == "P") {
+                   int <- sample.int(3, size = 1, 
+                                     prob = c(.45, .49, .06))
+                   pos_neg <- c("POS", "0", "NEG")[int]
+                   if (pos_neg == "POS") {
+                     yards_gained = ifelse(
+                       ytg <= 3,
+                       rlnorm(1, meanlog = 1.197, sdlog = 0.851),
+                       rgamma(1, shape = 3.026, rate = 0.332)
+                     ) 
+                   } else if (pos_neg == "NEG") {
+                     yards_gained = -rgamma(1, shape = 2.471, rate = 0.374)
+                   } else {
+                     yards_gained = 0 
+                   }
+                   
+                 } else if (play_type == "R") {
+                   int <- sample.int(2, size = 1, 
+                                     prob = c(697, 1-.697))
+                   pos_neg <- c("POS", "NEG")[int]
+                   if (pos_neg == "POS") {
+                     yards_gained = rlnorm(1, meanlog = 0.861, sdlog = .814) 
+                   } else if (pos_neg == "NEG") {
+                     yards_gained = -rlnorm(1, meanlog = 0.625, sdlog = 0.572)
+                   }
+               }
+             }
+          }
         }
       } 
-    }
     
     fp = fp + yards_gained
     # print(paste("New fp is:", fp))
@@ -268,7 +368,7 @@ full_drive <- function(fp, ytg, down, strat4th, pos){
     if (fp >= 100) {
       drive_result$score <- 7
       drive_result$event <- "Touchdown"
-      print("Touchdown")
+      # print("Touchdown")
       is_not_done <- FALSE
       break
     }
