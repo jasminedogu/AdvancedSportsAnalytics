@@ -1,4 +1,4 @@
-setwd("~/Fall 2021 Courses/STAT 4800/AdvancedSportsAnalytics")
+# setwd("~/Fall 2021 Courses/STAT 4800/AdvancedSportsAnalytics")
 library(tidyverse)
 source('final_project_basic_drive.R')
 source('field_goal_probability.R')
