@@ -53,3 +53,12 @@ monte_carlo <- replicate(10000,
                          ))
 
 mean(monte_carlo) -> ep_95_100
+
+# E[1st & 10 at FP+YTG] (after we convert on 4th down)
+# 60-68 FP, 2-3 YTG
+replicate(10000,
+          score_simulator(fp = sample(60:68, 1) + sample(2:3, 1),
+                          ytg = 10,
+                          down = 1,
+                          pos = 0
+          )) %>% mean()
